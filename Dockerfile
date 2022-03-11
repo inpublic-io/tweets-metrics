@@ -1,8 +1,8 @@
 FROM golang:1.17-alpine as build
 
-ADD . /go/src/github.com/inpublic-io/stream-tweets
+ADD . /go/src/github.com/inpublic-io/tweets-metrics
 
-WORKDIR /go/src/github.com/inpublic-io/stream-tweets
+WORKDIR /go/src/github.com/inpublic-io/tweets-metrics
 
 RUN go build -o "service" -tags musl ./
 
@@ -16,13 +16,7 @@ RUN apk update \
 	&& update-ca-certificates --fresh \
 	&& rm -rf /var/cache/apk/*
 
-# adds inpublic user
-RUN	addgroup inpublic \
-	&& adduser -S inpublic -u 1000 -G inpublic
-
-USER inpublic
-
-COPY --from=build --chown=inpublic:inpublic /go/src/github.com/inpublic-io/stream-tweets/service /usr/local/bin/
+COPY --from=build /go/src/github.com/inpublic-io/tweets-metrics/service /usr/local/bin/
 RUN chmod +x /usr/local/bin/service
 
 ENTRYPOINT [ "/usr/local/bin/service" ]
