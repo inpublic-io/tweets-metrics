@@ -82,12 +82,17 @@ func main() {
 			log.Fatalf("Failed to parse %q: %v", msg.ID, err)
 		}
 
-		fmt.Printf("Received (partition=%d, offset=%d): %s\n", metadata.Partition, metadata.Offset, string(msg.Data))
+		fmt.Printf("Received (partition=%d, offset=%d)\n", metadata.Partition, metadata.Offset)
 
 		var tweetStream *twitter.SearchStreamResponse
 		err = json.Unmarshal(msg.Data, &tweetStream)
 		if err != nil {
 			log.Fatalf("Failed to unmarshal %q: %v", msg.ID, err)
+		}
+
+		if len(tweetStream.Errors) > 0 {
+			fmt.Printf("errors from stream: %+v\n", tweetStream.Errors)
+			return
 		}
 
 		p := influxdb.NewPoint(
